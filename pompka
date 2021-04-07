@@ -1,0 +1,130 @@
+#include <LiquidCrystal_I2C.h>
+LiquidCrystal_I2C lcd(0x27, 20, 4);
+int a = 0;
+
+
+void setup() {
+  Serial.begin(9600);
+
+
+  pinMode(8, OUTPUT);           //cewka dól
+  pinMode(9, OUTPUT);           //cewka góra
+  pinMode(13, INPUT_PULLUP);    //przycisk odejmowanie
+  pinMode(12, INPUT_PULLUP);    //przycisk dodawanie
+  pinMode(11, INPUT_PULLUP);    //start
+  pinMode(10, INPUT);            //stop
+
+
+  lcd.begin();                  //lcd start
+  lcd.backlight();
+
+  lcd.setCursor(0, 0);
+  lcd.print("cel");
+  lcd.setCursor(9, 0);
+  lcd.print("akt");
+
+ 
+
+
+  while (digitalRead(11) != LOW) {          //ustawienie ciśnienia
+
+    if (digitalRead(12) == LOW) {
+      a += 10 ;
+    }
+    if (digitalRead(13) == LOW) {
+      a -= 10;
+    }
+
+    lcd.setCursor(0, 1);           //wyświetlanie celu
+    lcd.print(a);
+    delay(200);
+    
+    
+    int dol = analogRead(A2);       //zjazd na dół
+  if (dol > 100) {
+    digitalWrite(8, HIGH);
+    digitalWrite(9, LOW);
+  }
+else {
+  digitalWrite(8, HIGH);
+  digitalWrite(9,HIGH);
+}
+  
+
+ 
+  }
+
+}
+/*int sensorValue[4]={0,0,0,0};
+
+int measure() {
+  sensorValue[0]= analogRead (A0);
+  sensorValue[1]= analogRead(A0);
+  sensorValue[2]= analogRead(A0);
+  sensorValue[3]= (sensorValue[0]+sensorValue[1]+sensorValue[2])/3;
+  return sensorValue[3];}
+  
+*/
+
+void loop() {
+
+
+
+                           
+
+
+
+int sensorValue[6]={0,0,0,0,0,0};                                               //czujnik cisnienia
+  sensorValue[0]= analogRead (A0);
+  sensorValue[1]= analogRead(A0);
+  sensorValue[2]= analogRead(A0);
+  sensorValue[3]= analogRead(A0);
+  sensorValue[4]= analogRead(A0);
+  sensorValue[5]= (sensorValue[0]+sensorValue[1]+sensorValue[2]+sensorValue[3]+sensorValue[4])/5;
+
+
+  
+  int pressure = ((sensorValue[3] * 5) -1050);                //skalowanie odczytu
+
+  lcd.setCursor(9, 1);                                      //wyświetlanie ciśnienia
+  lcd.print("    ");
+  lcd.setCursor(9,1);
+  lcd.print(pressure);
+  delay(200);
+  
+  
+
+  if (pressure <= a) {                                      //wachlowanie do zadanego ciśnienia
+    int gora = analogRead(A1);
+    int dol = analogRead(A2);
+ 
+    Serial.println(pressure);
+   
+  if ( dol < 100 ) {
+      digitalWrite(8, LOW);
+      digitalWrite(9, HIGH);
+    }
+    if (gora < 100) {
+      digitalWrite(8, HIGH);
+      digitalWrite(9, LOW);
+    }
+  }
+  else {
+    digitalWrite(8, HIGH);
+    digitalWrite(9, HIGH);
+  }
+
+
+  if (digitalRead(10) == HIGH) {                               //stop
+    digitalWrite(8, HIGH);
+    digitalWrite(9, HIGH);
+  }
+ 
+  if (digitalRead(11) == LOW) {                               //start po stopie
+    digitalWrite(9, HIGH);
+  }
+
+  }
+
+
+  
